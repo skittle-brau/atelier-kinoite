@@ -1,14 +1,81 @@
 # Use the official Fedora Kinoite (KDE) base image
 FROM quay.io/fedora-ostree-desktops/kinoite:44
 
-# Add third-party repositories if needed (e.g., RPM Fusion)
-RUN dnf config-manager --add-repo https://mirrors.rpmfusion.org/free/fedora/rpmfusion-free-freeflow.repo
-
-# Install native packages directly into the image
+# Install RPM Fusion Free and Nonfree repositories directly
 RUN dnf install -y \
+    https://mirrors.rpmfusion.org/free/fedora/rpmfusion-free-release-44.noarch.rpm \
+    https://mirrors.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-44.noarch.rpm
+
+# 1Password
+## Add 1Password repository and GPG key
+RUN rpm --import https://downloads.1password.com/linux/keys/1password.asc && \
+    printf "[1password]\n\
+name=1Password Stable Channel\n\
+baseurl=https://downloads.1password.com/linux/rpm/stable/\$basearch\n\
+enabled=1\n\
+gpgcheck=1\n\
+repo_gpgcheck=1\n\
+gpgkey=https://downloads.1password.com/linux/keys/1password.asc\n" > /etc/yum.repos.d/1password.repo
+
+## Create the physical target directory in /usr/lib first
+## (The RPM naturally wants to install to /opt/1Password which is a symlink to /var/opt/1Password)
+RUN mkdir -p /usr/lib/1Password && ln -s /usr/lib/1Password /opt/1Password
+
+# Install 1Password, 1Password CLI, and other custom utilities
+RUN dnf5 install -y \
     distrobox \
     merkuro \
-    && dnf clean all
+    1password \
+    1password-cli \
+    && rm -f /etc/yum.repos.d/1password.repo \
+    && dnf5 clean all
+
+## Tell systemd to recreate the /var/opt/1Password symlink on boot (using tmpfiles.d)
+RUN mkdir -p /usr/lib/tmpfiles.d && \
+    echo "L /var/opt/1Password - - - - /usr/lib/1Password" > /usr/lib/tmpfiles.d/1password.conf
+
+## Install Polkit Policy (using the template provided by the 1Password install)
+RUN export POLICY_OWNERS="unix-user:root" && \
+    mkdir -p /usr/share/polkit-1/actions && \
+    eval "cat <<EOF\n$(cat /usr/lib/1Password/com.1password.1Password.policy.tpl)\nEOF" \
+    > /usr/share/polkit-1/actions/com.1password.1Password.policy
+
+## Install custom allowed browsers configuration
+RUN install -Dm0644 /usr/lib/1Password/resources/custom_allowed_browsers -t /etc/1password/
+
+## Set chrome-sandbox setuid permissions
+RUN chmod 4755 /usr/lib/1Password/chrome-sandbox
+
+## Create standard binary symlink
+RUN ln -sf /usr/lib/1Password/1password /usr/bin/1password
+
+## Configure Browser Native Messaging (Firefox/Chrome integration)
+RUN mkdir -p /usr/lib/mozilla/native-messaging-hosts && \
+    printf '{\n\
+  "name": "com.1password.1password",\n\
+  "description": "1Password BrowserSupport",\n\
+  "path": "/usr/lib/1Password/1Password-BrowserSupport",\n\
+  "type": "stdio",\n\
+  "allowed_extensions": [\n\
+    "{0a75d802-9aed-41e7-8daa-24c067386e82}",\n\
+    "{25fc87fa-4d31-4fee-b5c1-c32a7844c063}",\n\
+    "{d634138d-c276-4fc8-924b-40a0ea21d284}"\n\
+  ]\n\
+}\n' > /usr/lib/mozilla/native-messaging-hosts/com.1password.1password.json && \
+    mkdir -p /usr/lib64/mozilla/native-messaging-hosts && \
+    cp /usr/lib/mozilla/native-messaging-hosts/com.1password.1password.json \
+       /usr/lib64/mozilla/native-messaging-hosts/com.1password.1password.json
+
+## Define system groups & apply strict GIDs and permissions
+RUN mkdir -p /usr/lib/sysusers.d && \
+    printf "g onepassword     1500\ng onepassword-cli 1600\n" > /usr/lib/sysusers.d/onepassword.conf && \
+    chgrp 1500 /usr/lib/1Password/1Password-BrowserSupport && \
+    chmod g+s /usr/lib/1Password/1Password-BrowserSupport && \
+    chgrp 1600 /usr/bin/op && \
+    chmod g+s /usr/bin/op
+
+## Complete clean-up of /var state to guarantee "bootc lint" passes
+RUN rm -rf /var/lib/dnf /var/cache/dnf /var/log/dnf* /var/opt/1Password
 
 # Copy system configurations directly to /etc or /usr
 # Example: Adding a custom policy or configuration file
