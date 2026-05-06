@@ -37,9 +37,9 @@ RUN mkdir -p /usr/lib/tmpfiles.d && \
     echo "L /var/opt/1Password - - - - /usr/lib/1Password" > /usr/lib/tmpfiles.d/1password.conf
 
 ## Install Polkit Policy (using the template provided by the 1Password install)
-RUN export POLICY_OWNERS="unix-user:root" && \
-    mkdir -p /usr/share/polkit-1/actions && \
-    eval "cat <<EOF\n$(cat /usr/lib/1Password/com.1password.1Password.policy.tpl)\nEOF" \
+RUN mkdir -p /usr/share/polkit-1/actions && \
+    sed "s/{{POLICY_OWNERS}}/unix-user:root/g" \
+    /usr/lib/1Password/com.1password.1Password.policy.tpl \
     > /usr/share/polkit-1/actions/com.1password.1Password.policy
 
 ## Install custom allowed browsers configuration
