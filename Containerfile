@@ -23,10 +23,19 @@ RUN mkdir -p /usr/lib/1Password && \
     mkdir -p /opt && \
     ln -sf /usr/lib/1Password /opt/1Password
 
-# Install 1Password, 1Password CLI, and other custom utilities
+# Install 1Password, 1Password CLI, and other custom packages
 RUN dnf5 install -y \
     distrobox \
+    korganizer \
     merkuro \
+    kate \
+    gnome-disk-utility \
+    virt-manager \
+    libvirt \
+    libvirt-client \
+    virt-install \
+    virt-viewer \
+    qemu-kvm \
     1password \
     1password-cli \
     && rm -f /etc/yum.repos.d/1password.repo \
