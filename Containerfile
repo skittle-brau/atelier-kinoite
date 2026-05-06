@@ -30,6 +30,7 @@ RUN dnf5 install -y \
     merkuro \
     kate \
     gnome-disk-utility \
+    steam-devices \
     virt-manager \
     libvirt \
     libvirt-client \
