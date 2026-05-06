@@ -6,6 +6,43 @@ RUN dnf install -y \
     https://mirrors.rpmfusion.org/free/fedora/rpmfusion-free-release-44.noarch.rpm \
     https://mirrors.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-44.noarch.rpm
 
+# Install packages
+
+## ROCm and HIP
+RUN dnf5 install -y \
+    rocm-hip \
+    rocm-opencl \
+    rocm-clinfo \
+    && dnf5 clean all
+
+## Development & System Tools
+RUN dnf5 install -y \
+    distrobox \
+    kate \
+    gnome-disk-utility \
+    && dnf5 clean all
+
+## Gaming
+RUN dnf5 install -y \
+    steam-devices \
+    && dnf5 clean all
+
+## KDE PIM & Personal Apps
+RUN dnf5 install -y \
+    korganizer \
+    merkuro \
+    && dnf5 clean all
+
+## Virtualisation Stack
+RUN dnf5 install -y \
+    virt-manager \
+    libvirt \
+    libvirt-client \
+    virt-install \
+    virt-viewer \
+    qemu-kvm \
+    && dnf5 clean all
+
 # 1Password
 ## Add 1Password repository and GPG key
 RUN rpm --import https://downloads.1password.com/linux/keys/1password.asc && \
@@ -25,18 +62,6 @@ RUN mkdir -p /usr/lib/1Password && \
 
 # Install 1Password, 1Password CLI, and other custom packages
 RUN dnf5 install -y \
-    distrobox \
-    korganizer \
-    merkuro \
-    kate \
-    gnome-disk-utility \
-    steam-devices \
-    virt-manager \
-    libvirt \
-    libvirt-client \
-    virt-install \
-    virt-viewer \
-    qemu-kvm \
     1password \
     1password-cli \
     && rm -f /etc/yum.repos.d/1password.repo \
