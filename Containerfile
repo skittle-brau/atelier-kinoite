@@ -19,7 +19,9 @@ gpgkey=https://downloads.1password.com/linux/keys/1password.asc\n" > /etc/yum.re
 
 ## Create the physical target directory in /usr/lib first
 ## (The RPM naturally wants to install to /opt/1Password which is a symlink to /var/opt/1Password)
-RUN mkdir -p /usr/lib/1Password && ln -s /usr/lib/1Password /opt/1Password
+RUN mkdir -p /opt && \
+    mkdir -p /usr/lib/1Password && \
+    ln -s /usr/lib/1Password /opt/1Password
 
 # Install 1Password, 1Password CLI, and other custom utilities
 RUN dnf5 install -y \
