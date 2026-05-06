@@ -17,8 +17,10 @@ gpgcheck=1\n\
 repo_gpgcheck=1\n\
 gpgkey=https://downloads.1password.com/linux/keys/1password.asc\n" > /etc/yum.repos.d/1password.repo
 
-# Use -p on the sub-directory and -sf for the link
+# Workaround for /opt
 RUN mkdir -p /usr/lib/1Password && \
+    rm -f /opt && \
+    mkdir -p /opt && \
     ln -sf /usr/lib/1Password /opt/1Password
 
 # Install 1Password, 1Password CLI, and other custom utilities
