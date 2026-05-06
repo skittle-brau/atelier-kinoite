@@ -18,6 +18,7 @@ RUN dnf5 install -y \
 ## Development & System Tools
 RUN dnf5 install -y \
     distrobox \
+    gcc \
     kate \
     gnome-disk-utility \
     && dnf5 clean all
