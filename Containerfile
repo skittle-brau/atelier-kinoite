@@ -49,11 +49,13 @@ RUN dnf5 install -y \
 RUN sed -i 's/enabled=0/enabled=1/' /etc/yum.repos.d/fedora-cisco-openh264.repo
 
 # Swap to Full Codecs and FFmpeg
-# We use 'swap' to replace the restricted versions with the 'freeworld' versions
-RUN dnf5 swap -y mesa-va-drivers mesa-va-drivers-freeworld && \
-    dnf5 swap -y mesa-vdpau-drivers mesa-vdpau-drivers-freeworld && \
-    dnf5 swap -y ffmpeg-free ffmpeg --allowerasing && \
-    dnf5 install -y \
+# 1. Update the whole system first to ensure we are on the latest Fedora base
+# 2. Install everything in one single transaction with --allowerasing
+RUN dnf5 -y update && \
+    dnf5 -y --allowerasing --best install \
+        mesa-va-drivers-freeworld \
+        mesa-vdpau-drivers-freeworld \
+        ffmpeg \
         intel-media-driver \
         gstreamer1-plugin-libav \
         gstreamer1-plugins-bad-free-extras \
