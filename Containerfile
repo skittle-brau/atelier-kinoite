@@ -52,7 +52,7 @@ RUN sed -i 's/enabled=0/enabled=1/' /etc/yum.repos.d/fedora-cisco-openh264.repo
 # 1. Update the whole system first to ensure we are on the latest Fedora base
 # 2. Install everything in one single transaction with --allowerasing
 RUN dnf5 -y update && \
-    dnf5 -y --allowerasing --best install \
+    dnf5 install -y --allowerasing --best \
         mesa-va-drivers-freeworld \
         mesa-vdpau-drivers-freeworld \
         ffmpeg \
