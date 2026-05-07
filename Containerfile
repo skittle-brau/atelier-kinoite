@@ -44,6 +44,14 @@ RUN dnf5 install -y \
     qemu-kvm \
     && dnf5 clean all
 
+# Remove Firefox from the base image
+RUN rpm-ostree override remove firefox firefox-langpacks && \
+    rpm-ostree cleanup -a && \
+    rm -rf /var/cache/yum
+
+# Preinstall flatpak applications
+COPY flatpak-apps.preinstall /usr/share/flatpak/preinstall.d/
+
 # 1Password
 ## Add 1Password repository and GPG key
 RUN rpm --import https://downloads.1password.com/linux/keys/1password.asc && \
