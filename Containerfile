@@ -48,25 +48,20 @@ RUN dnf5 install -y \
 # Enable the Cisco OpenH264 repo
 RUN sed -i 's/enabled=0/enabled=1/' /etc/yum.repos.d/fedora-cisco-openh264.repo
 
-# Swap to Full FFmpeg and Hardware Acceleration Drivers
-# This handles the replacement of 'free' libs and adds Intel/AMD specific drivers
-RUN rpm-ostree override remove \
-        mesa-va-drivers \
-        mesa-vdpau-drivers \
-    --install mesa-va-drivers-freeworld \
-    --install mesa-vdpau-drivers-freeworld \
-    --install intel-media-driver \
-    --install ffmpeg \
-    --prepare && \
-    rpm-ostree install \
+# Swap to Full Codecs and FFmpeg
+# We use 'swap' to replace the restricted versions with the 'freeworld' versions
+RUN dnf5 swap -y mesa-va-drivers mesa-va-drivers-freeworld && \
+    dnf5 swap -y mesa-vdpau-drivers mesa-vdpau-drivers-freeworld && \
+    dnf5 swap -y ffmpeg-free ffmpeg --allowerasing && \
+    dnf5 install -y \
+        intel-media-driver \
         gstreamer1-plugin-libav \
         gstreamer1-plugins-bad-free-extras \
         gstreamer1-plugins-bad-freeworld \
         gstreamer1-plugins-ugly \
         gstreamer1-vaapi \
-        libavcodec-freeworld \
-        --prepare && \
-    rm -rf /var/cache/dnf /var/cache/yum
+        libavcodec-freeworld && \
+    dnf5 clean all
 
 # Preinstall flatpak applications
 COPY flatpak-apps.preinstall /usr/share/flatpak/preinstall.d/
