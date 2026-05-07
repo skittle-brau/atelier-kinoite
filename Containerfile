@@ -46,8 +46,8 @@ RUN dnf5 install -y \
 
 # Remove Firefox from the base image
 RUN rpm-ostree override remove firefox firefox-langpacks && \
-    rpm-ostree cleanup -a && \
-    rm -rf /var/cache/yum
+    rpm-ostree cleanup -m -r && \
+    rm -rf /var/cache/yum /var/cache/dnf
 
 # Preinstall flatpak applications
 COPY flatpak-apps.preinstall /usr/share/flatpak/preinstall.d/
