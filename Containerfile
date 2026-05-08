@@ -49,18 +49,18 @@ RUN dnf5 install -y \
 RUN sed -i 's/enabled=0/enabled=1/' /etc/yum.repos.d/fedora-cisco-openh264.repo
 
 # Swap to Full Codecs and FFmpeg
-# 1. Update the base system
 RUN dnf5 -y update && \
-    # 2. Install FFmpeg and GStreamer bits (usually safer version-wise)
-    dnf5 install -y --allowerasing \
+    dnf5 install -y --allowerasing --best \
+        mesa-va-drivers-freeworld \
+        mesa-vdpau-drivers-freeworld \
         ffmpeg \
-        libavcodec-freeworld \
+        intel-media-driver \
+        gstreamer1-plugin-libav \
+        gstreamer1-plugins-bad-free-extras \
         gstreamer1-plugins-bad-freeworld \
         gstreamer1-plugins-ugly \
-        intel-media-driver && \
-    # 3. Attempt Mesa Freeworld, but skip if the mirrors are broken
-    dnf5 install -y --skip-unavailable \
-        mesa-va-drivers-freeworld || true && \
+        gstreamer1-vaapi \
+        libavcodec-freeworld && \
     dnf5 clean all
 
 # Preinstall flatpak applications
