@@ -51,7 +51,6 @@ RUN sed -i 's/enabled=0/enabled=1/' /etc/yum.repos.d/fedora-cisco-openh264.repo
 # Swap to Full Codecs and FFmpeg
 RUN dnf5 -y update && \
     dnf5 install -y --allowerasing --best \
-        mesa-va-drivers-freeworld \
         ffmpeg \
         intel-media-driver \
         gstreamer1-plugin-libav \
