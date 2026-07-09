@@ -25,6 +25,7 @@ RUN dnf5 install -y \
 
 ## Gaming
 RUN dnf5 install -y \
+    steam \
     steam-devices \
     && dnf5 clean all
 
