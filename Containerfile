@@ -48,7 +48,6 @@ RUN dnf5 install -y \
     && dnf5 clean all
 
 ### Install Klassy
-
 RUN source /etc/os-release && \
     curl -Lo /etc/yum.repos.d/home_paulmcauley.repo \
       "https://download.opensuse.org/repositories/home:paulmcauley/Fedora_${VERSION_ID}/home:paulmcauley.repo" && \
@@ -73,6 +72,26 @@ RUN dnf5 -y update && \
 
 # Preinstall flatpak applications
 COPY flatpak-apps.preinstall /usr/share/flatpak/preinstall.d/
+
+# VS Code
+## Add Microsoft repository and GPG key
+RUN rpm --import https://packages.microsoft.com/keys/microsoft.asc && \
+    printf "[code]\n\
+name=Visual Studio Code\n\
+baseurl=https://packages.microsoft.com/yumrepos/vscode\n\
+enabled=1\n\
+gpgcheck=1\n\
+gpgkey=https://packages.microsoft.com/keys/microsoft.asc\n" > /etc/yum.repos.d/vscode.repo
+
+## Install VS Code, then drop the repo file
+RUN dnf5 install -y code \
+    && rm -f /etc/yum.repos.d/vscode.repo \
+    && dnf5 clean all
+
+## Disable in-app auto-update (breaks on OSTree — image layer is the only valid update path)
+RUN mkdir -p /etc/skel/.config/Code/User && \
+    printf '{\n  "update.mode": "none",\n  "extensions.autoUpdate": false\n}\n' \
+    > /etc/skel/.config/Code/User/settings.json
 
 # 1Password
 ## Add 1Password repository and GPG key
