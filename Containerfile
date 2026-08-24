@@ -21,6 +21,7 @@ RUN dnf5 install -y \
     gcc \
     kate \
     gnome-disk-utility \
+    tmux \
     && dnf5 clean all
 
 ## Gaming
