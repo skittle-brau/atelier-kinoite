@@ -2,9 +2,9 @@
 FROM quay.io/fedora-ostree-desktops/kinoite:44
 
 # Install RPM Fusion Free and Nonfree repositories directly
-RUN dnf install -y \
-    https://mirrors.rpmfusion.org/free/fedora/rpmfusion-free-release-44.noarch.rpm \
-    https://mirrors.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-44.noarch.rpm
+RUN dnf5 install -y \
+    https://mirrors.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm \
+    https://mirrors.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm
 
 # Install packages
 
@@ -45,6 +45,14 @@ RUN dnf5 install -y \
     virt-viewer \
     qemu-kvm \
     && dnf5 clean all
+
+### Install Klassy
+
+RUN source /etc/os-release && \
+    curl -Lo /etc/yum.repos.d/home_paulmcauley.repo \
+      "https://download.opensuse.org/repositories/home:paulmcauley/Fedora_${VERSION_ID}/home:paulmcauley.repo" && \
+    dnf5 install -y klassy && \
+    rm /etc/yum.repos.d/home_paulmcauley.repo
 
 # Enable the Cisco OpenH264 repo
 RUN sed -i 's/enabled=0/enabled=1/' /etc/yum.repos.d/fedora-cisco-openh264.repo
