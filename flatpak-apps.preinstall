@@ -14,10 +14,6 @@ IsRuntime=false
 Branch=stable
 IsRuntime=false
 
-[Flatpak Preinstall com.valvesoftware.Steam]
-Branch=stable
-IsRuntime=false
-
 [Flatpak Preinstall com.vysp3r.ProtonPlus]
 Branch=stable
 IsRuntime=false
